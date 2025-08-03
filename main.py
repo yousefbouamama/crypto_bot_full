@@ -4,7 +4,6 @@ from web import app as web_app
 from fastapi import FastAPI
 import uvicorn
 import os
-import json
 from license import check_license
 from dotenv import load_dotenv
 from telegram import Bot
@@ -45,7 +44,7 @@ async def notify():
 async def start_bot():
     while True:
         await notify()
-        await asyncio.sleep(600)
+        await asyncio.sleep(600)  # كل 10 دقائق
 
 app = FastAPI()
 
@@ -53,7 +52,13 @@ app = FastAPI()
 async def startup_event():
     asyncio.create_task(start_bot())
 
-app.mount("/", web_app)
+# ✅ Health Check Endpoint
+@app.get("/")
+async def root():
+    return {"status": "Bot is running on Render"}
+
+# ✅ Mount واجهة الويب الخاصة بك
+app.mount("/web", web_app)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000)
